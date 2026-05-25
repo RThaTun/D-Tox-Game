@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import CARD_DATA from '../CardData';
 
 function shuffle(arr) {
@@ -47,8 +47,19 @@ export function useGame() {
   const [log, setLog] = useState([]);
   const [gameOver, setGameOver] = useState(null);
   const [status, setStatus] = useState('');
+  const gameStateRef = useRef(null);
 
   const addLog = (msg) => setLog(prev => [msg, ...prev].slice(0, 8));
+
+  const checkEnd = (state) => {
+    if (state.playerHP <= 0 || state.aiHP <= 0 || state.deck.length === 0) {
+      const winner = state.playerHP > state.aiHP ? 'You'
+        : state.aiHP > state.playerHP ? 'AI' : 'Tie';
+      setGameOver({ winner, playerHP: state.playerHP, aiHP: state.aiHP });
+      return true;
+    }
+    return false;
+  };
 
   const initGame = useCallback(() => {
     const deck = shuffle([...CARD_DATA, ...CARD_DATA]);
@@ -57,7 +68,7 @@ export function useGame() {
       playerHand.push(deck.pop());
       aiHand.push(deck.pop());
     }
-    setGameState({
+    const initial = {
       deck,
       playerHand,
       aiHand,
@@ -65,7 +76,9 @@ export function useGame() {
       aiHP: 20,
       turn: 'player',
       lastPlayed: null
-    });
+    };
+    gameStateRef.current = initial;
+    setGameState(initial);
     setSelected([]);
     setLog([]);
     setGameOver(null);
@@ -88,51 +101,49 @@ export function useGame() {
     });
   }, [gameState]);
 
-  const checkEnd = (state) => {
-    if (state.playerHP <= 0 || state.aiHP <= 0 || state.deck.length === 0) {
-      const winner = state.playerHP > state.aiHP ? 'You'
-        : state.aiHP > state.playerHP ? 'AI' : 'Tie';
-      setGameOver({ winner, playerHP: state.playerHP, aiHP: state.aiHP });
-      return true;
-    }
-    return false;
-  };
+  const doAITurn = useCallback((currentState) => {
+    const prev = currentState;
+    const next = {
+      ...prev,
+      aiHand: [...prev.aiHand],
+      playerHand: [...prev.playerHand],
+      deck: [...prev.deck]
+    };
 
-  const doAITurn = useCallback(() => {
-    setGameState(prev => {
-      if (!prev) return prev;
-      const next = {
-        ...prev,
-        aiHand: [...prev.aiHand],
-        playerHand: [...prev.playerHand],
-        deck: [...prev.deck]
-      };
-      const play = aiChoosePlay(next.aiHand);
-      if (!play) {
-        next.turn = 'player';
-        setStatus('Your turn!');
-        return next;
-      }
-
-      const cards = play.indices.map(i => next.aiHand[i]);
-      const effect = calcEffect(cards);
-
-      if (play.target === 'self') next.aiHP = Math.max(0, prev.aiHP + effect);
-      else next.playerHP = Math.max(0, prev.playerHP + effect);
-
-      play.indices.sort((a, b) => b - a).forEach(i => next.aiHand.splice(i, 1));
-      while (next.aiHand.length < 6 && next.deck.length > 0) {
-        next.aiHand.push(next.deck.pop());
-      }
-
-      next.lastPlayed = cards[cards.length - 1];
+    const play = aiChoosePlay(next.aiHand);
+    if (!play) {
       next.turn = 'player';
+      gameStateRef.current = next;
+      setGameState(next);
+      setStatus('Your turn! Select cards to play.');
+      return;
+    }
 
-      addLog(`AI played ${cards.map(c => c.name).join(' + ')} on ${play.target === 'self' ? 'itself' : 'you'} (${effect >= 0 ? '+' : ''}${effect} HP)`);
+    const cards = play.indices.map(i => next.aiHand[i]);
+    const effect = calcEffect(cards);
 
-      if (!checkEnd(next)) setStatus('Your turn! Select cards to play.');
-      return next;
-    });
+    if (play.target === 'self') {
+      next.aiHP = Math.min(20, Math.max(0, prev.aiHP + effect));
+    } else {
+      next.playerHP = Math.max(0, prev.playerHP + effect);
+    }
+
+    play.indices.sort((a, b) => b - a).forEach(i => next.aiHand.splice(i, 1));
+    while (next.aiHand.length < 6 && next.deck.length > 0) {
+      next.aiHand.push(next.deck.pop());
+    }
+
+    next.lastPlayed = cards[cards.length - 1];
+    next.turn = 'player';
+
+    addLog(`AI played ${cards.map(c => c.name).join(' + ')} on ${play.target === 'self' ? 'itself' : 'you'} (${effect >= 0 ? '+' : ''}${effect} HP)`);
+
+    gameStateRef.current = next;
+    setGameState(next);
+
+    if (!checkEnd(next)) {
+      setStatus('Your turn! Select cards to play.');
+    }
   }, []);
 
   const playCards = useCallback((target) => {
@@ -140,35 +151,38 @@ export function useGame() {
     const cards = selected.map(i => gameState.playerHand[i]);
     const effect = calcEffect(cards);
 
-    setGameState(prev => {
-      const next = {
-        ...prev,
-        playerHand: [...prev.playerHand],
-        aiHand: [...prev.aiHand],
-        deck: [...prev.deck]
-      };
+    const next = {
+      ...gameState,
+      playerHand: [...gameState.playerHand],
+      aiHand: [...gameState.aiHand],
+      deck: [...gameState.deck]
+    };
 
-      if (target === 'self') next.playerHP = Math.max(0, prev.playerHP + effect);
-      else next.aiHP = Math.max(0, prev.aiHP + effect);
+    if (target === 'self') {
+      next.playerHP = Math.min(20, Math.max(0, gameState.playerHP + effect));
+    } else {
+      next.aiHP = Math.max(0, gameState.aiHP + effect);
+    }
 
-      [...selected].sort((a, b) => b - a).forEach(i => next.playerHand.splice(i, 1));
-      while (next.playerHand.length < 6 && next.deck.length > 0) {
-        next.playerHand.push(next.deck.pop());
-      }
+    [...selected].sort((a, b) => b - a).forEach(i => next.playerHand.splice(i, 1));
+    while (next.playerHand.length < 6 && next.deck.length > 0) {
+      next.playerHand.push(next.deck.pop());
+    }
 
-      next.lastPlayed = cards[cards.length - 1];
-      next.turn = 'ai';
+    next.lastPlayed = cards[cards.length - 1];
+    next.turn = 'ai';
 
-      addLog(`You played ${cards.map(c => c.name).join(' + ')} on ${target === 'self' ? 'yourself' : 'AI'} (${effect >= 0 ? '+' : ''}${effect} HP)`);
+    addLog(`You played ${cards.map(c => c.name).join(' + ')} on ${target === 'self' ? 'yourself' : 'AI'} (${effect >= 0 ? '+' : ''}${effect} HP)`);
 
-      if (!checkEnd(next)) {
-        setStatus('AI is thinking...');
-        setTimeout(() => doAITurn(), 1300);
-      }
-      return next;
-    });
     setSelected([]);
-  }, [gameState, selected]);
+    gameStateRef.current = next;
+    setGameState(next);
+
+    if (!checkEnd(next)) {
+      setStatus('AI is thinking...');
+      setTimeout(() => doAITurn(next), 1300);
+    }
+  }, [gameState, selected, doAITurn]);
 
   return { gameState, selected, log, gameOver, status, initGame, toggleCard, playCards };
 }
