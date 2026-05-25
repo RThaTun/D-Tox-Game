@@ -134,6 +134,7 @@ export default function SinglePlayer() {
       {gameOver && (
         <GameOverModal
           winner={gameOver.winner}
+          reason={gameOver.reason}
           players={[
             { displayName: 'You', hp: gameOver.playerHP },
             { displayName: 'AI', hp: gameOver.aiHP }

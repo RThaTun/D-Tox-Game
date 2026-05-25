@@ -1,12 +1,19 @@
 import React from 'react';
 
-export default function GameOverModal({ winner, players, onPlayAgain }) {
+export default function GameOverModal({ winner, players, onPlayAgain, reason }) {
+  const isDeckOut = reason === 'deckout';
+
   return (
     <div className="modal-overlay">
       <div className="modal">
         <div className="modal-title">
           {winner === 'Tie' ? "It's a Tie!" : `${winner} Wins! 🎉`}
         </div>
+        {isDeckOut && (
+          <div className="modal-reason">
+            🃏 Deck ran out — winner decided by HP!
+          </div>
+        )}
         <div className="modal-scores">
           {players.map((p, i) => (
             <div key={i} className="modal-score-row">

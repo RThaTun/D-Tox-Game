@@ -51,15 +51,23 @@ export function useGame() {
 
   const addLog = (msg) => setLog(prev => [msg, ...prev].slice(0, 8));
 
-  const checkEnd = (state) => {
-    if (state.playerHP <= 0 || state.aiHP <= 0 || state.deck.length === 0) {
-      const winner = state.playerHP > state.aiHP ? 'You'
+    const checkEnd = (state) => {
+    if (state.playerHP <= 0) {
+        setGameOver({ winner: 'AI', playerHP: state.playerHP, aiHP: state.aiHP, reason: 'knockout' });
+        return true;
+    }
+    if (state.aiHP <= 0) {
+        setGameOver({ winner: 'You', playerHP: state.playerHP, aiHP: state.aiHP, reason: 'knockout' });
+        return true;
+    }
+    if (state.deck.length === 0) {
+        const winner = state.playerHP > state.aiHP ? 'You'
         : state.aiHP > state.playerHP ? 'AI' : 'Tie';
-      setGameOver({ winner, playerHP: state.playerHP, aiHP: state.aiHP });
-      return true;
+        setGameOver({ winner, playerHP: state.playerHP, aiHP: state.aiHP, reason: 'deckout' });
+        return true;
     }
     return false;
-  };
+    };
 
   const initGame = useCallback(() => {
     const deck = shuffle([...CARD_DATA, ...CARD_DATA]);
