@@ -21,14 +21,30 @@ export default function SinglePlayer() {
 
   return (
     <div className="page-game">
+            {/* Title */}
+        <div className="game-title">
+        <div className="logo">D-<span>Tox</span></div>
+        <div className="tagline">Game your way to better social health</div>
+        </div>
 
-      <ScoreBoard
-        players={[
-          { label: 'You', hp: playerHP, isActive: isMyTurn },
-          { label: 'AI 🤖', hp: aiHP, isActive: !isMyTurn },
-        ]}
-        maxHP={20}
-      />
+{/* Scoreboard */}
+      <div className="scoreboard">
+        <div className={`player-score ${isMyTurn ? 'active' : ''}`}>
+          <div className="player-label">You</div>
+          <div className="hp-number">{playerHP}</div>
+          <div className="hp-bar-container">
+            <div className="hp-bar" style={{ width: `${(playerHP / 20) * 100}%` }} />
+          </div>
+        </div>
+        <div className="vs-badge">VS</div>
+        <div className={`player-score ${!isMyTurn ? 'active' : ''}`}>
+          <div className="player-label">AI 🤖</div>
+          <div className="hp-number">{aiHP}</div>
+          <div className="hp-bar-container">
+            <div className="hp-bar" style={{ width: `${(aiHP / 20) * 100}%` }} />
+          </div>
+        </div>
+      </div>
 
       <div className="status-bar">{status}</div>
 
@@ -89,10 +105,10 @@ export default function SinglePlayer() {
           </div>
           <div className="action-row">
             <button className="btn-action blue" disabled={!canPlay} onClick={() => playCards('self')}>
-              ✦ Myself
+               Myself
             </button>
             <button className="btn-action pink" disabled={!canPlay} onClick={() => playCards('opponent')}>
-              ✦ AI
+               AI
             </button>
           </div>
         </div>

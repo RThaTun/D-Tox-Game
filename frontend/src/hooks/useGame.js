@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import CARD_DATA from '../cardData';
+import CARD_DATA from '../CardData';
 
 function shuffle(arr) {
   const a = [...arr];
