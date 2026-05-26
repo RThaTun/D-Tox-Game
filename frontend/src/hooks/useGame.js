@@ -131,7 +131,7 @@ export function useGame() {
     const effect = calcEffect(cards);
 
     if (play.target === 'self') {
-      next.aiHP = Math.min(20, Math.max(0, prev.aiHP + effect));
+        next.aiHP = Math.max(0, prev.aiHP + effect);
     } else {
       next.playerHP = Math.max(0, prev.playerHP + effect);
     }
@@ -167,7 +167,7 @@ export function useGame() {
     };
 
     if (target === 'self') {
-      next.playerHP = Math.min(20, Math.max(0, gameState.playerHP + effect));
+      next.playerHP = Math.max(0, gameState.playerHP + effect);
     } else {
       next.aiHP = Math.max(0, gameState.aiHP + effect);
     }

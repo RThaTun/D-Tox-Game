@@ -1,0 +1,31 @@
+{
+  "files": {
+    "main.css": "/static/css/main.9f11a51a.css",
+    "main.js": "/static/js/main.b76b06ff.js",
+    "static/media/detox1.png": "/static/media/detox1.5849d925e7131b2ef02e.png",
+    "static/media/detox18.png": "/static/media/detox18.e8e82503208b0de465a4.png",
+    "static/media/detox4.png": "/static/media/detox4.5f36da173adc80146000.png",
+    "static/media/detox13.png": "/static/media/detox13.0f98ae0ff049fba0566f.png",
+    "static/media/detox17.png": "/static/media/detox17.2ca3afd6b53010bbcb1b.png",
+    "static/media/detox3.png": "/static/media/detox3.14753289886870fbc203.png",
+    "static/media/detox15.png": "/static/media/detox15.a425b94d5593a0e6be2a.png",
+    "static/media/detox7.png": "/static/media/detox7.8cced630659a1d912f4a.png",
+    "static/media/detox11.png": "/static/media/detox11.ae5d78b806f797256395.png",
+    "static/media/detox2.png": "/static/media/detox2.57315e9d26198bf37031.png",
+    "static/media/detox6.png": "/static/media/detox6.59221eef700f4f980218.png",
+    "static/media/detox10.png": "/static/media/detox10.1aaab0b436ab965d8fdf.png",
+    "static/media/detox8.png": "/static/media/detox8.8313b4acc0345e189db6.png",
+    "static/media/detox14.png": "/static/media/detox14.d8deb6a210035f5d00f6.png",
+    "static/media/detox5.png": "/static/media/detox5.c3a2c8c264b7a1a2e854.png",
+    "static/media/detox16.png": "/static/media/detox16.128a8e6250238e5b0d56.png",
+    "static/media/detox9.png": "/static/media/detox9.1ef78eef462c11bae887.png",
+    "static/media/detox12.png": "/static/media/detox12.ca7e60e10e31db15f6be.png",
+    "index.html": "/index.html",
+    "main.9f11a51a.css.map": "/static/css/main.9f11a51a.css.map",
+    "main.b76b06ff.js.map": "/static/js/main.b76b06ff.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9f11a51a.css",
+    "static/js/main.b76b06ff.js"
+  ]
+}
